@@ -38,5 +38,8 @@ class BinarySearchTree {
       }
     }
   }
+
+  traverse() {}
+  traverseWhile() {}
 }
 module.exports = BinarySearchTree;

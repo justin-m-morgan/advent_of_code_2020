@@ -1,14 +1,58 @@
-const readline = require("readline");
-const fs = require("fs");
+const { pipe } = require("ramda");
 const BST = require("../utils/binary_search_tree");
+const readlineAsyncGenerator = require("../utils/generator_line_reader");
 
-async function processLineByLine() {
-  const filestream = fs.createReadStream("./src/day_1/input.txt");
+// ================================================================
+//          Day 1 - Part 1
+// ================================================================
+function findTwoNumbersSumming(targetSum) {
+  return function ({ tree, list }) {
+    let soughtNumbers;
+    list.some((testValue) => {
+      let remainder = targetSum - testValue;
+      let exists = tree.search(remainder);
+      if (exists) {
+        soughtNumbers = [testValue, remainder];
+      }
+      return exists;
+    });
 
-  const rl = readline.createInterface({
-    input: filestream,
-    srlfDelay: Infinity,
-  });
+    return soughtNumbers;
+  };
+}
+
+// To produce answer on console
+processInput().then(pipe(findTwoNumbersSumming(2020), product, logIt));
+
+// ================================================================
+//          Day 1 - Part 2
+// ================================================================
+function findThreeNumbersSumming(targetSum) {
+  return function ({ tree, list }) {
+    let values;
+
+    for (let i = 0; i < list.length; i++) {
+      let currentValue = list[i];
+      let remainder = targetSum - currentValue;
+      let pair = findTwoNumbersSumming(remainder)({ tree, list });
+      if (pair) {
+        values = [currentValue, ...pair];
+        break;
+      }
+    }
+    return values;
+  };
+}
+
+processInput().then(pipe(findThreeNumbersSumming(2020), product, logIt));
+
+// ================================================================
+//          Utils
+// ================================================================
+async function processInput() {
+  const path = "./src/day_1/input.txt";
+
+  const rl = readlineAsyncGenerator(path);
 
   // Gather Values from file
   let tree;
@@ -25,33 +69,11 @@ async function processLineByLine() {
   return { tree, list };
 }
 
-// ================================================================
-//          Day 1 - Part 1
-// ================================================================
-async function findTwoNumbersSumming(targetSum) {
-  const { tree, list } = await processLineByLine();
-
-  let soughtNumbers;
-  const sumExists = list.some((value) => {
-    let targetValue = targetSum - value;
-    let exists = tree.search(targetValue);
-    if (exists) {
-      soughtNumbers = [value, targetValue];
-    }
-    return exists;
-  });
-
-  let result = sumExists ? soughtNumbers : false;
-  let resultProduct;
-  if (result) {
-    resultProduct = result[0] * result[1];
-  }
-  console.log(resultProduct);
+function product(input) {
+  if (!input) return false;
+  return input.reduce((acc, curr) => acc * curr, 1);
 }
-
-// To produce answer on console
-// findTwoNumbersSumming(2020);
-
-// ================================================================
-//          Day 1 - Part 2
-// ================================================================
+function logIt(it) {
+  console.log(it);
+  return it;
+}

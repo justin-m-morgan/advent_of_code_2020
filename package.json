@@ -26,5 +26,9 @@
     "commitizen": {
       "path": "cz-emoji"
     }
+  },
+  "dependencies": {
+    "ramda": "^0.27.1",
+    "split2": "^3.2.2"
   }
 }
